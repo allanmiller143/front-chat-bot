@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "baseUrl": "src", // permite imports relativos a /src
+    "paths": {
+      "@/*": ["*"]     // agora você pode importar com "@/components/..."
+    }
+  },
+  "include": ["src"]
+}
