@@ -58,9 +58,9 @@ const Header = () => {
             </Tabs> */}
 
                 
-                <IconButton onClick={toggleTheme} >
+                {/* <IconButton onClick={toggleTheme} >
                     {mode === 'light' ? <DarkModeIcon /> : <LightModeIcon />}
-                </IconButton>
+                </IconButton> */}
             </Toolbar>
     </AppBar>
   );
