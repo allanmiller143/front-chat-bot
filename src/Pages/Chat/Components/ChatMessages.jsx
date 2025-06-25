@@ -9,7 +9,7 @@ const ChatMessages = ({ messages, loading }) => {
   }, [messages, loading]);
 
   return (
-    <Box px={2} pt={2} pb={10} sx={{ overflowY: "auto", flex: 1 }}>
+    <Box px={2} pt={2} pb={10} sx={{ overflowY: "auto", flex: 1, maxWidth:"md", margin : '0 auto'}}>
       {messages.map((msg, index) => (
         <Box
           key={index}
@@ -22,7 +22,7 @@ const ChatMessages = ({ messages, loading }) => {
             sx={{
               px: 2,
               py: 1,
-              maxWidth: "70%",
+              maxWidth: "85%",
               bgcolor: msg.from === "user" ? "message.main" : "message.secondary",
               color: msg.from === "user" ? "#fff" : "#000",
               borderRadius: msg.from === "user" ? "10px 20px 0 10px" : "20px 10px 10px 0",

@@ -6,7 +6,8 @@ import DarkModeIcon from '@mui/icons-material/DarkMode';
 import { useThemeContext } from '../../Theme/CustomThemeProvider';
 import LgBox from '../LgBox';
 import Logo from './Logo/Logo';
-const Header = () => {
+import ChatDrawer from '../../Pages/Chat/Components/Drawer';
+const Header = ({ setChatId }) => {
   const [value, setValue] = useState(0);
   const location = useLocation();
   const { mode, toggleTheme } = useThemeContext();
@@ -31,6 +32,8 @@ const Header = () => {
   return (
     <AppBar position="sticky" color='inherit' sx = {{height: '95px', boxShadow: 'none', display: 'flex', alignItems: 'center'}}>
             <Toolbar style={{ display: 'flex', justifyContent: 'space-between', width: '100%',height: '100%', maxWidth: '1500px', margin: '0 auto' }}>
+            <ChatDrawer setChatId={setChatId} />
+
             <Logo/>
             {/* <Tabs
                 value={value}

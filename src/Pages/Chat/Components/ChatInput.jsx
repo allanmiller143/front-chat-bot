@@ -1,9 +1,13 @@
-import { Box, IconButton, TextField } from "@mui/material";
+import { Box, Button, IconButton, TextField } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
+import MicIcon from '@mui/icons-material/Mic';
+
 import { useState } from "react";
+import GravadorAudioDialog from "./AudioRecroder";
 
 const ChatInput = ({ onSend }) => {
   const [message, setMessage] = useState("");
+  const [abrirDialog, setAbrirDialog] = useState(false);
 
   const handleSend = () => {
     if (message.trim()) {
@@ -16,8 +20,14 @@ const ChatInput = ({ onSend }) => {
     if (e.key === "Enter") handleSend();
   };
 
+
+  const handleAudio = (blob) => {
+    console.log("Áudio recebido:", blob);
+    // Aqui você pode enviar para o backend, transcrever, etc
+  };
+
   return (
-    <Box display="flex" flexDirection={"row"} alignItems={"center"} backgroundColor="background.default" gap={1} pb={2} position="fixed" bottom={0} left={20} right={0} zIndex={10} maxWidth='lg' margin={'0 auto'}>
+    <Box display="flex" flexDirection={"row"} alignItems={"center"} backgroundColor="background.default" pb={2} position="fixed" bottom={0} left={10} right={0} zIndex={10} margin={'0 auto'} maxWidth='md'>
         <TextField
             fullWidth
             placeholder="Faça sua pergunta..."
@@ -53,6 +63,15 @@ const ChatInput = ({ onSend }) => {
       <IconButton onClick={handleSend} color="primary" disabled={!message.trim()}>
         <SendIcon />
       </IconButton>
+      <IconButton variant="contained" onClick={() => setAbrirDialog(true)}>
+        <MicIcon/>
+      </IconButton>
+
+      <GravadorAudioDialog
+        open={abrirDialog}
+        onClose={() => setAbrirDialog(false)}
+        onAudioReady={handleAudio}
+      />
       
     </Box>
   );
