@@ -5,7 +5,7 @@ import MicIcon from '@mui/icons-material/Mic';
 import { useState } from "react";
 import GravadorAudioDialog from "./AudioRecroder";
 
-const ChatInput = ({ onSend }) => {
+const ChatInput = ({ onSend, setMessages, messages, setLoading, chatId }) => {
   const [message, setMessage] = useState("");
   const [abrirDialog, setAbrirDialog] = useState(false);
 
@@ -21,10 +21,6 @@ const ChatInput = ({ onSend }) => {
   };
 
 
-  const handleAudio = (blob) => {
-    console.log("Áudio recebido:", blob);
-    // Aqui você pode enviar para o backend, transcrever, etc
-  };
 
   return (
     <Box display="flex" flexDirection={"row"} alignItems={"center"} backgroundColor="background.default" pb={2} position="fixed" bottom={0} left={10} right={0} zIndex={10} margin={'0 auto'} maxWidth='md'>
@@ -70,7 +66,10 @@ const ChatInput = ({ onSend }) => {
       <GravadorAudioDialog
         open={abrirDialog}
         onClose={() => setAbrirDialog(false)}
-        onAudioReady={handleAudio}
+        messages={messages}
+        setMessages={setMessages}
+        setLoading={setLoading}
+        chatId={chatId}
       />
       
     </Box>

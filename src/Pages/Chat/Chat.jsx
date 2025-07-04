@@ -3,12 +3,12 @@ import Header from "../../Components/Header/Header";
 import LgBox from "../../Components/LgBox";
 import ChatMessages from "./Components/ChatMessages";
 import ChatInput from "./Components/ChatInput";
-import { postData } from "../../Services/Api";
-import ChatDrawer from "./Components/Drawer";
-
+import { getData, postData } from "../../Services/Api";
+import { useNavigate } from "react-router-dom";
 const Chat = () => {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
+  const Navigate  = useNavigate();
 
   const [chatId, setChatId] = useState(() => {
     const saved = localStorage.getItem("chatId");
@@ -22,44 +22,51 @@ const Chat = () => {
   useEffect(() => {
     async function carregarMensagens() {
       try {
-        const res = await fetch(`http://localhost:3001/api/mensagens/${chatId}`);
-        const data = await res.json();
-
-        if (Array.isArray(data.mensagens)) {
-          setMessages(data.mensagens);
+        const res = await getData(`api/mensagens/${chatId}`);
+        console.log("Mensagens carregadas:", res);
+        if (res.status === 200 && res.userInfo) {
+          setMessages(res.userInfo.mensagens);
+          console.log("Mensagens definidas:", res.userInfo.mensagens);
         } else {
           setMessages([
             { from: "bot", text: "Olá! Como posso ajudar você hoje?" }
           ]);
         }
       } catch (error) {
+        Navigate("*");
         console.error("Erro ao carregar mensagens:", error);
         setMessages([
           { from: "bot", text: "Olá! Como posso ajudar você hoje?" }
         ]);
       }
     }
-
     carregarMensagens();
   }, [chatId]);
 
 
   const handleSend = async (message) => {
-    const userMessage = { from: "user", text: message };
+    const userMessage = { from: "user", text: message, type: "text" };
     const mensagensAtualizadas = [...messages, userMessage];
 
     setMessages(mensagensAtualizadas);
     setLoading(true);
 
     try {
-      const resposta = await postData("api/gerar", {
+      const resposta = await postData("api/pergunta", {
         mensagens: mensagensAtualizadas,
         chatId
       });
 
+      console.log("Resposta do backend:", resposta);
+
       const botMessage = {
         from: "bot",
-        text: resposta?.data?.resposta || "Erro ao obter resposta do Gemini.",
+        text: resposta?.data?.resposta || "Erro ao obter resposta.",
+        type: resposta?.data?.type || "text",
+        id: resposta?.data?.id || null,
+        resposta: resposta?.data?.resposta || null,
+        score: resposta?.data?.score || null,
+        pergunta: message || null,
       };
 
       setMessages((prev) => [...prev, botMessage]);
@@ -80,7 +87,7 @@ const Chat = () => {
       <Header setChatId={setChatId}/>
       <LgBox>
         <ChatMessages messages={messages} loading={loading} />
-        <ChatInput onSend={handleSend} />
+        <ChatInput onSend={handleSend} setMessages={setMessages} messages={messages} setLoading={setLoading} chatId={chatId} />
       </LgBox>
     </>
   );

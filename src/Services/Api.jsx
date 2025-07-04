@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 
 import axios from 'axios';
-const apiUrl = 'http://localhost:3001/';
+const apiUrl = 'https://46a4-2804-29b8-515c-19b-2dcf-4e61-b2e8-c52d.ngrok-free.app/';
 
 export async function getData(url= '',token = '') {
   try {

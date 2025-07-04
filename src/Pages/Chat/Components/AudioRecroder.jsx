@@ -1,16 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogActions,
-  Button,
-  Typography,
-  IconButton
-} from '@mui/material';
-import MicIcon from '@mui/icons-material/Mic';
+import {Dialog,DialogContent,DialogActions,Button,Typography,IconButton} from '@mui/material';
 import StopIcon from '@mui/icons-material/Stop';
+import { postData } from '../../../Services/Api';
 
-const GravadorAudioDialog = ({ open, onClose, onAudioReady }) => {
+const GravadorAudioDialog = ({ open, onClose, setMessages, messages, setLoading, chatId }) => {
   const [isRecording, setIsRecording] = useState(false);
   const [audioBlob, setAudioBlob] = useState(null);
   const [status, setStatus] = useState("Clique em gravar para começar");
@@ -49,7 +42,7 @@ const GravadorAudioDialog = ({ open, onClose, onAudioReady }) => {
         const blob = new Blob(chunks.current, { type: 'audio/webm' });
         setAudioBlob(blob);
         setIsRecording(false);
-        setStatus("Gravação finalizada");
+        setStatus("");
       };
 
       mediaRecorder.start();
@@ -78,9 +71,54 @@ const GravadorAudioDialog = ({ open, onClose, onAudioReady }) => {
     onClose();
   };
 
-  const enviarAudio = () => {
-    onAudioReady(audioBlob);
-    handleClose();
+  const enviarAudio = async () => {
+    if (!audioBlob) return;
+    onClose();
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      const base64Audio = reader.result.split(',')[1]; // remove o prefixo 'data:audio/webm;base64,...'
+      
+      console.log("Base64 do áudio:", base64Audio);
+
+      const userMessage = { from: "user", text: base64Audio, type : "audio", audioUrl : 'loading', temp : audioBlob };
+      const mensagensAtualizadas = [...messages, userMessage];
+      
+      setMessages(mensagensAtualizadas);
+      setLoading(true);
+
+      try {
+        const resposta = await postData("api/pergunta", {
+          mensagens: mensagensAtualizadas,
+          chatId
+        });
+
+        console.log("Resposta do backend:", resposta);
+
+        const botMessage = {
+          from: "bot",
+          text: resposta?.data?.resposta || "Erro ao obter resposta.",
+          type: resposta?.data?.type || "text",
+          audioUrl: resposta?.data?.audioUrl || null,
+          score: resposta?.data?.score || null,
+          resposta: resposta?.data?.resposta || null,
+          id: resposta?.data?.id || null,
+        };
+
+        setMessages((prev) => [...prev, botMessage]);
+      } catch (err) {
+        console.error("Erro ao enviar mensagem:", err);
+        setMessages((prev) => [
+          ...prev,
+          { from: "bot", text: "❌ Erro ao se conectar com o backend." },
+        ]);
+      } finally {
+        setLoading(false);
+        onClose();
+      }
+      handleClose();
+    };
+
+    reader.readAsDataURL(audioBlob);
   };
 
   return (
@@ -93,6 +131,7 @@ const GravadorAudioDialog = ({ open, onClose, onAudioReady }) => {
           onClick={ pararGravacao}
           size="large"
           disabled={!isRecording}
+          sx={{ display: isRecording ? 'block' : 'none', margin: '0 auto' }}
         >
           <StopIcon fontSize="large" /> 
         </IconButton>

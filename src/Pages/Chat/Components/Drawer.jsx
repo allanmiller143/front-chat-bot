@@ -1,21 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Drawer,
-  List,
-  ListItemText,
-  IconButton,
-  Button,
-  Divider,
-  Box,
-  Typography,
-  Menu,
-  MenuItem
-} from '@mui/material';
+import {Drawer,List,ListItemText,IconButton,Divider,Box,Typography,Menu,MenuItem} from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import LightModeIcon from '@mui/icons-material/LightMode';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 import Chat from '@mui/icons-material/Chat';
 import { useThemeContext } from '../../../Theme/CustomThemeProvider';
+import { deleteData, getData } from '../../../Services/Api';
+import { useNavigate } from 'react-router-dom';
 
 const drawerWidth = 280;
 
@@ -30,16 +21,15 @@ const ChatDrawer = ({ chatId, setChatId }) => {
   const { mode, toggleTheme } = useThemeContext();
   const [menuAnchorEl, setMenuAnchorEl] = useState(null);
   const [chatParaExcluir, setChatParaExcluir] = useState(null);
+  const Navigate = useNavigate();
 
   useEffect(() => {
     async function buscarChats() {
       try {
-        const res = await fetch("http://localhost:3001/api/chats");
-        const data = await res.json();
-        if (Array.isArray(data.chats)) {
-          setConversas(data.chats);
-        }
+        const res = await getData("api/chats");
+        setConversas(res.userInfo.chats);
       } catch (err) {
+        Navigate("*");
         console.error("Erro ao buscar chats:", err);
       }
     }
@@ -74,17 +64,12 @@ const ChatDrawer = ({ chatId, setChatId }) => {
 
   const excluirChat = async () => {
     try {
-      await fetch(`http://localhost:3001/api/chats/${chatParaExcluir}`, {
-        method: 'DELETE',
-      });
-
+      await deleteData(`api/chats/${chatParaExcluir}`);
       setConversas(prev => prev.filter(c => c.id !== chatParaExcluir));
-
       if (chatParaExcluir === chatId) {
         setChatId(null);
         localStorage.removeItem("chatId");
       }
-
       fecharMenu();
     } catch (err) {
       console.error("Erro ao excluir chat:", err);
@@ -98,50 +83,53 @@ const ChatDrawer = ({ chatId, setChatId }) => {
       </IconButton>
 
       <Drawer open={open} onClose={() => setOpen(false)} anchor="left">
-        <Box
-          sx={{
-            width: drawerWidth,
-            height: '100%',
-            display: 'flex',
-            flexDirection: 'column',
-          }}
-        >
-          {/* Header */}
           <Box
             sx={{
+              width: drawerWidth,
+              height: '100%',
               display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              px: 2,
-              pt: 2,
-              pb: 1
+              flexDirection: 'column',
+              
             }}
           >
-            <Typography variant="h6">Suas Conversas</Typography>
-            <IconButton onClick={toggleTheme}>
-              {mode === 'light' ? <DarkModeIcon /> : <LightModeIcon />}
-            </IconButton>
-          </Box>
+            {/* Header */}
+            <Box sx = {{backgroundColor : mode === 'light' ? '#f0f0f0' : '#1a1a1a'}}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  px: 2,
+                  pt: 2,
+                  pb: 1,
+                }}
+              >
+                <Typography variant="h6">Suas Conversas</Typography>
+                <IconButton onClick={toggleTheme}>
+                  {mode === 'light' ? <DarkModeIcon /> : <LightModeIcon />}
+                </IconButton>
+              </Box>
 
-          {/* Novo chat */}
-          <Box
-            onClick={novaConversa}
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              cursor: 'pointer',
-              px: 2,
-              py: 1.5,
-              gap: 1.5,
-              borderRadius: 1,
-              '&:hover': { backgroundColor: '#cccccc20' }
-            }}
-          >
-            <Chat />
-            <Typography>Novo chat</Typography>
-          </Box>
+              {/* Novo chat */}
+              <Box
+                onClick={novaConversa}
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  cursor: 'pointer',
+                  px: 2,
+                  py: 1.5,
+                  gap: 1.5,
+                  borderRadius: 1,
+                  '&:hover': { backgroundColor: '#cccccc20' }
+                }}
+              >
+                <Chat />
+                <Typography>Novo chat</Typography>
+              </Box>
+            </Box>
 
-          <Divider />
+            <Divider />
 
           {/* Lista com scroll */}
           <Box sx={{ flexGrow: 1, overflowY: 'auto', p: 2 }}>
